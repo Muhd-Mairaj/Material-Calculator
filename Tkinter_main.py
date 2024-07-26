@@ -87,23 +87,6 @@ def add_or_replace_attr_in_info_file(attr: str, value: str):
         f.write("\n".join(rewritten_lines))
 
 
-
-# Function for sorting items in descending order
-
-
-def sort_d(item):
-    stop = 0
-    while True:
-        if stop == len(item):
-            break
-        for x in range(len(item) - 1):
-            if item[x] < item[x + 1]:
-                item[x], item[x + 1] = item[x + 1], item[x]
-        stop += 1
-    return item
-
-
-
 # Function to simplify the order of slicing
 
 
