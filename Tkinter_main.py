@@ -261,7 +261,7 @@ def combinations_method(arr):
     order_of_slice = []
 
     # sort_d(arr)
-    arr.sort()
+    arr.sort(reverse=True)
     while len(arr) >= 1:
         material = 12000
         material -= Decimal(arr[0])
@@ -323,7 +323,8 @@ def sort_method(arr):
 
     print("\nUSING SORTING METHOD")
     # sort_d(arr)
-    arr.sort()
+    arr.sort(reverse=True)
+    
 
     material = 12000
     required2 = 1
@@ -529,12 +530,13 @@ def run():
 
     # Use the two methods
 
-    combinations_method(items_list1)
+    # combinations_method(items_list1)
     sort_method(items_list2)
 
     # Check which did better and display it on the required label
 
-    which_better = check_which_better(better_label)
+    # which_better = check_which_better(better_label)
+    which_better = "Sort method"
 
     # Add text about combinations method
 
