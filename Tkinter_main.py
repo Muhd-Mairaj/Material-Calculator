@@ -87,59 +87,6 @@ def add_or_replace_attr_in_info_file(attr: str, value: str):
         f.write("\n".join(rewritten_lines))
 
 
-# Function for finding the best combinations
-
-
-def combinations_custom(iterable, r, metal):
-    global stopping, x_index, y_index
-
-    metal_less_some = (metal - Decimal("100"))
-
-    pool = [item for item in iterable if Decimal(item) <= metal]
-    for item in pool:
-        # if Decimal(item) >= (METAL - Decimal("100")) and Decimal(item) <= METAL:
-        if metal_less_some <= Decimal(item) <= metal:
-            yield [item]
-            stopping = True
-            return
-    n = len(pool)
-    if r > n:
-        return
-
-    indices = list(range(r))
-    comb_sum = sum(list(Decimal(pool[i]) for i in indices))
-    # if comb_sum >= METAL_LESS_SOME and comb_sum <= METAL:
-    if metal_less_some <= comb_sum <= metal:
-        yield list(pool[i] for i in indices)
-        stopping = True
-        x_index = r - 1
-        y_index = -1
-        return
-    elif comb_sum <= metal:
-        yield list(pool[i] for i in indices)
-
-    while True:
-        for i in reversed(range(r)):
-            if indices[i] != i + n - r:
-                break
-        else:
-            return
-
-        indices[i] += 1
-        for j in range(i + 1, r):
-            indices[j] = indices[j - 1] + 1
-
-        comb_sum = sum(list(Decimal(pool[i]) for i in indices))
-        # if comb_sum >= METAL_LESS_SOME and comb_sum <= METAL:
-        if metal_less_some <= comb_sum <= metal:
-            yield list(pool[i] for i in indices)
-            stopping = True
-            x_index = r - 1
-            y_index = -1
-            return
-        elif comb_sum <= metal:
-            yield list(pool[i] for i in indices)
-
 
 # Function for sorting items in descending order
 
@@ -155,35 +102,6 @@ def sort_d(item):
         stop += 1
     return item
 
-
-# Function to find the best combination from all combinations
-
-
-def best_combination_of(arr):
-    global x_index, y_index
-
-    if y_index != 0:
-        return arr[x_index][y_index]
-
-    total = 0
-    for index_list, type_of_combination in enumerate(arr):
-        combination_total = 0
-        y = 0
-        for index, combination in enumerate(type_of_combination):
-            sum_numbers = 0
-            for value in combination:
-                sum_numbers += Decimal(value)
-
-            if combination_total < sum_numbers <= 12000:
-                combination_total = sum_numbers
-                y = index
-
-        if total < combination_total <= 12000:
-            total = combination_total
-            x_index = index_list
-            y_index = y
-
-    return arr[x_index][y_index]
 
 
 # Function to simplify the order of slicing
@@ -242,77 +160,6 @@ def find_show_order(order_of_slice):
     return show_order  # Returns simplified order, with total used per material in 'pipe' character
     # ["a", "b", "c", "x", "y", "z"] --> [a, b, c, |sum|, x, y, z, |sum|]
 
-
-# Function for Combinations Method
-
-
-def combinations_method(arr):
-    global show_order1, required1, scrap1, excess1
-    global stopping, x_index, y_index
-
-    print(f"The length of the list we're working with: {len(arr)}")
-    print(arr)
-    print("\nUSING COMBINATION METHOD")
-
-    material = 12000
-    required1 = 1
-    scrap1 = 0
-    excess1 = 0
-    order_of_slice = []
-
-    # sort_d(arr)
-    arr.sort(reverse=True)
-    while len(arr) >= 1:
-        material = 12000
-        material -= Decimal(arr[0])
-        order_of_slice.append(arr[0])
-        arr.pop(0)
-
-        if len(arr) == 0:
-            break
-
-        all_combinations = []
-        stopping = False
-        x_index = 0
-        y_index = 0
-        for x in range(1, len(arr) + 1):
-            combination = list(combinations_custom(arr, x, material))
-            if combination == []:
-                break
-            all_combinations.append(combination)
-            if stopping:
-                break
-
-        if len(all_combinations) == 0:
-            scrap1 += material
-            required1 += 1
-            continue
-
-        best_combination = best_combination_of(all_combinations)
-
-        for value in best_combination:
-            material -= Decimal(value)
-            pop_index = arr.index(value)
-            order_of_slice.append(arr[pop_index])
-            arr.pop(pop_index)
-
-        if len(arr) >= 1:
-            scrap1 += material
-            required1 += 1
-        else:
-            break
-    else:
-        required1 = 0
-        material = 0
-
-    excess1 = material
-
-    show_order1 = find_and_log_show_order(order_of_slice)
-
-    print(f"\033[1;32;40m\n\nrequired raw material: {required1}")
-    print(f"order of slice: {show_order1}")
-    print(f"total scrap: {scrap1}")
-    print(f"excess at the end: {excess1}\033[1;37;40m \n")
 
 
 # Function for Sorting Method
@@ -530,13 +377,12 @@ def run():
 
     # Use the two methods
 
-    # combinations_method(items_list1)
     sort_method(items_list2)
 
     # Check which did better and display it on the required label
 
     # which_better = check_which_better(better_label)
-    which_better = "Sort method"
+    which_better = "Sort Method"
 
     # Add text about combinations method
 
