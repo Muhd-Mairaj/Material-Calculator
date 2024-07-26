@@ -11,9 +11,12 @@ Ready to use
 def combinations_custom(iterable, r, metal):
     global stopping, x_index, y_index
 
+    metal_less_some = (metal - Decimal("100"))
+
     pool = [item for item in iterable if Decimal(item) <= metal]
     for item in pool:
-        if Decimal(item) >= (metal - Decimal("0.1")) and Decimal(item) <= metal:
+        # if Decimal(item) >= (METAL - Decimal("100")) and Decimal(item) <= METAL:
+        if metal_less_some <= Decimal(item) <= metal:
             yield [item]
             stopping = True
             return
@@ -22,14 +25,15 @@ def combinations_custom(iterable, r, metal):
         return
 
     indices = list(range(r))
-    combination_sum = sum(list(Decimal(pool[i]) for i in indices))
-    if combination_sum >= (metal - Decimal("0.1")) and combination_sum <= metal:
+    comb_sum = sum(list(Decimal(pool[i]) for i in indices))
+    # if comb_sum >= METAL_LESS_SOME and comb_sum <= METAL:
+    if metal_less_some <= comb_sum <= metal:
         yield list(pool[i] for i in indices)
         stopping = True
-        x_index = (r - 1)
+        x_index = r - 1
         y_index = -1
         return
-    elif combination_sum <= metal:
+    elif comb_sum <= metal:
         yield list(pool[i] for i in indices)
 
     while True:
@@ -38,19 +42,20 @@ def combinations_custom(iterable, r, metal):
                 break
         else:
             return
-            
+
         indices[i] += 1
-        for j in range(i+1, r):
-            indices[j] = indices[j-1] + 1
-        combination_sum = sum(list(Decimal(pool[i]) for i in indices))
-        
-        if combination_sum >= (metal - Decimal("0.1")) and combination_sum <= metal:
+        for j in range(i + 1, r):
+            indices[j] = indices[j - 1] + 1
+
+        comb_sum = sum(list(Decimal(pool[i]) for i in indices))
+        # if comb_sum >= METAL_LESS_SOME and comb_sum <= METAL:
+        if metal_less_some <= comb_sum <= metal:
             yield list(pool[i] for i in indices)
             stopping = True
-            x_index = (r - 1)
+            x_index = r - 1
             y_index = -1
             return
-        elif combination_sum <= metal:
+        elif comb_sum <= metal:
             yield list(pool[i] for i in indices)
 
 
