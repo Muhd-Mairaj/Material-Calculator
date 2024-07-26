@@ -16,11 +16,12 @@ ONEDRIVE_DESKTOP_PATH = os.path.join(BASE_DIR, "users", USER, "onedrive", "deskt
 # USER_DESKTOP_PATH = os.path.join(cur_dir, "users", user_name, "desktop")
 USER_DESKTOP_PATH = os.path.join(BASE_DIR, "onedrive", "desktop")
 
-# Required variable initiations
+# Regular expression to find "path of the file/file.xlsx"
+regex = re.compile(r".*.xlsx")
 
+# Required variable initiations
 log_file_path = ""
 excel_file_path = ""
-
 
 items_list1 = []
 items_list2 = []
@@ -62,7 +63,7 @@ def add_or_replace_attr_in_info_file(attr: str, value: str):
     Rewrite every line in the info file with the following rules:\n
         - if the attr already exists, replaces the attr
         - else, adds the attribute in the rewritten file
-    
+
     :param attr: The attribute to add or replaces
     :param value: The required new value of the chosen attribute
 
@@ -88,8 +89,6 @@ def add_or_replace_attr_in_info_file(attr: str, value: str):
 
 
 # Function to simplify the order of slicing
-
-
 def find_and_log_show_order(order_of_slice):
 
     show_order = find_show_order(order_of_slice)
@@ -106,7 +105,7 @@ def log_order_of_slice(show_order):
     log_file_path = find_attr_in_info_file("log_file_path")
 
     # Fixes the issue where log file path is not chosen. and the program is still intitiated.
-    # This situtation should not arise, and this bit is reduntant, 
+    # This situtation should not arise, and this bit is reduntant,
     # but is included for the safety of the functioning of the program
     # and also to not have a different default location than the one chose by the user
     while not log_file_path:
@@ -144,17 +143,14 @@ def find_show_order(order_of_slice):
     # ["a", "b", "c", "x", "y", "z"] --> [a, b, c, |sum|, x, y, z, |sum|]
 
 
-
 # Function for Sorting Method
-
-
 def sort_method(arr):
     global show_order2, required2, scrap2, excess2
 
     print("\nUSING SORTING METHOD")
     # sort_d(arr)
     arr.sort(reverse=True)
-    
+
 
     material = 12000
     required2 = 1
@@ -190,9 +186,7 @@ def sort_method(arr):
 
 
 # Function to add entries to the treeview in enter values tab
-
 iid_count1 = 0
-
 def add_values():
     global iid_count1, items_list1, items_list2
 
@@ -227,8 +221,6 @@ def add_values():
 
 
 # Function to remove entry from the treeview in enter values tab
-
-
 def remove_value():
     rem_iid = tree1.focus()       # gives iid of treeview row
     rem_values = tree1.item(rem_iid, "values")  # gives 'values' of the selected row
@@ -244,8 +236,6 @@ def remove_value():
 
 
 # function to check which did better
-
-
 def check_which_better(
     better: Label,
 ) -> Literal["Combination method", "Sort method", "Same"]:
@@ -291,8 +281,6 @@ def check_which_better(
 
 
 # Function that handles all requirements when 'Done' is pressed
-
-
 def run():
     # add_values()
     global show_order1, required1, scrap1, excess1
@@ -307,9 +295,7 @@ def run():
     elif root.tk_focusPrev().winfo_parent() == frame2.__str__():
         leaving2 = True
 
-
     # Remove unnecessary widgets
-
     root.destroy()
 
     window = Tk()
@@ -320,7 +306,6 @@ def run():
     ##### ---------- Make Widgets ---------- #####
 
     # Textbox for better method
-
     display_textbox = Text(
         master=window,
         bg="#A9A9A9",
@@ -334,7 +319,6 @@ def run():
     )
 
     # Label for which did better
-
     better_label = Label(
         master=window,
         bg="black",
@@ -344,7 +328,6 @@ def run():
     )
 
     # Button to return back to main menu or exit
-
     back_button = Button(
         master=window,
         bg="green",
@@ -359,16 +342,16 @@ def run():
     ########## -------------------- Output -------------------- ##########
 
     # Use the two methods
-
     sort_method(items_list2)
+
 
     # Check which did better and display it on the required label
 
     # which_better = check_which_better(better_label)
     which_better = "Sort Method"
 
-    # Add text about combinations method
 
+    # Add text about combinations method
     if (which_better == "Combination method") or (which_better == "Same"):
         required = required1
         scrap = scrap1
@@ -404,8 +387,8 @@ def run():
     better_label.pack(padx=2, pady=(5, 0), anchor=CENTER)
     back_button.pack(padx=5, pady=5, anchor=W)
 
-    # Additional Information for me
 
+    # Additional Information for me
     window.update()
     app_width = window.winfo_reqwidth()
     app_height = window.winfo_reqheight()
@@ -414,12 +397,8 @@ def run():
     window.mainloop()
 
 
-# Regular expression to find "path of the file/file.xlsx"
-
-regex = re.compile(r".*.xlsx")
 
 # Define Functions to get file path
-
 def get_path():
     global excel_file_path
 
@@ -441,8 +420,6 @@ def get_path():
 
 # Find the row no. with values, column no. of profiles, quantities and lenghts
 # as well as which rows to skip and when to stop
-
-
 def find_rows_and_columns(sheet):
     global start_row, stop_row, skip_rows
     global profile_column, length_column, qty_column
@@ -484,7 +461,6 @@ def find_rows_and_columns(sheet):
 
 
 iid_count2 = 0
-
 def add_values2():
     global excel_file_path
     global iid_count2
@@ -495,8 +471,8 @@ def add_values2():
     sheets = wb.sheetnames
     sheet = wb[sheets[0]]
 
-    # finds the row, and the required columns
 
+    # finds the row, and the required columns
     find_rows_and_columns(sheet)
 
     print(f"start row: {start_row}")
@@ -505,8 +481,8 @@ def add_values2():
     print(f"qty column: {qty_column}")
     print(f"stop row: {stop_row}")
 
-    # Extract values from the correct rows and columns
 
+    # Extract values from the correct rows and columns
     for row in range(start_row, stop_row):
         if row in skip_rows:
             continue
@@ -569,9 +545,8 @@ def user_choose_log_path(master: Tk=None, label=None):
     add_or_replace_attr_in_info_file("log_file_path", log_file_path)
 
 
+
 # Main Function - Shows tkinter view
-
-
 def main():
     global frame1, frame2, my_notebook, tree1, tree2
     global values_entry, quantity_entry
@@ -596,17 +571,16 @@ def main():
 
 
     # Create Notebook
-
     my_notebook = ttk.Notebook(root)
     my_notebook.pack(pady=(3, 0))
 
-    # Make frames for each tab
 
+    # Make frames for each tab
     frame1 = Frame(my_notebook, width=400, height=400, bg="black")
     frame2 = Frame(my_notebook, width=400, height=400, bg="black")
 
-    # Make tabs
 
+    # Make tabs
     my_notebook.add(frame1,text="Enter Values")
     my_notebook.add(frame2, text="Choose Excel File")
 
@@ -615,10 +589,11 @@ def main():
 
     leaving1, leaving2 = False, False
 
+
     ##########------------------- FRAME1 ------------------- ##########
 
-    # Defining style for treeview
 
+    # Defining style for treeview
     style = ttk.Style()
     style.theme_use("alt")
     style.configure(
@@ -632,7 +607,6 @@ def main():
 
 
     ###### ---------- Make Widgets ---------- #####
-
     values_label = Label(frame1, text="Enter length of item: ", anchor=W, font="times 14")
     values_label.grid(row=1, column=1, padx=(3, 0), pady=(3, 0), sticky="news")
 
@@ -656,16 +630,16 @@ def main():
     remove_button = Button(frame1, text="Remove Value", font="times 13", pady=2, command=remove_value)
     remove_button.grid(row=3, column=1, columnspan=2, padx=(10, 4), pady=(5, 0))
 
-    # Treeview
 
+    # Treeview
     tree1 = ttk.Treeview(frame1)
     tree1["columns"] = ("Item", "Quantity")
     tree1.column("#0", width=0, minwidth=0)
     tree1.column("Item", width=120, minwidth=25)
     tree1.column("Quantity", width=120, minwidth=25)
 
-    # Treeview Headings
 
+    # Treeview Headings
     tree1.heading("Item", text="Item Length", anchor=W)
     tree1.heading("Quantity", text="Quantity", anchor=W)
     tree1.grid(row=4, column=1, columnspan=2, padx=(3, 3), pady=(5, 0), sticky=W)
@@ -675,12 +649,14 @@ def main():
     done_button = Button(frame1, text="Done", font="times 13", padx=20, pady=2, command=run    )
     done_button.grid(row=5, column=2, padx=3, pady=(5, 0), sticky=E)
 
+
     # Bindings
+    # no binding added here yet
 
     ##########------------------- FRAME2 ------------------- ##########
 
-    # Make widgets
 
+    # Make widgets
     choose_path_label = Label(
         master=frame2,
         bg="black",
@@ -729,12 +705,12 @@ def main():
         command=run,
     )
 
+
     # # Making treeview number 2
 
     # check_box_frame = Frame(frame2)
 
     # tree2
-
     tree2 = ttk.Treeview(frame2)
     tree2["columns"] = ("Item", "Quantity")
     tree2.column("#0", width=0, minwidth=0, stretch=NO)
@@ -742,12 +718,10 @@ def main():
     tree2.column("Quantity", width=105, minwidth=25)
 
     # Treeview number 2 Headings
-
     tree2.heading("Item", text="Item Length", anchor=W)
     tree2.heading("Quantity", text="Quantity", anchor=W)
 
     # Place Widgets
-
     choose_path_label.grid(row=1, column=1, padx=(3, 0), pady=(3, 0), sticky="news")
     choose_path_button.grid(row=2, column=1, padx=(3, 0), pady=(3, 0))
     selected_path_label.grid(row=3, column=1, padx=(3, 0), pady=(3, 0))
@@ -755,8 +729,8 @@ def main():
     tree2.grid(row=5, column=1, padx=(3, 3), pady=(5, 0), sticky=W)
     done_button2.grid(row=5, column=2, padx=(3, 3), sticky=S + E)
 
-    # Additional info for me
 
+    # Additional info for me
     root.update()
     app_width = root.winfo_reqwidth()
     app_height = root.winfo_reqheight()
@@ -844,7 +818,5 @@ def initial_dialog():
 
 
 if __name__ == "__main__":
-
     initial_dialog()
-
     main()
