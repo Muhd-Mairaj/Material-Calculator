@@ -1,0 +1,7 @@
+# .gitignore
+# Base
+# Resources
+Class_main.py
+Class_Tkinter_main.py
+# requirements.txt
+# tkinter_main.py
