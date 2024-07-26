@@ -1,6 +1,7 @@
 # .gitignore
 # Base
 # Resources
+venv
 Class_main.py
 Class_Tkinter_main.py
 # requirements.txt

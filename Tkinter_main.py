@@ -260,7 +260,8 @@ def combinations_method(arr):
     excess1 = 0
     order_of_slice = []
 
-    sort_d(arr)
+    # sort_d(arr)
+    arr.sort()
     while len(arr) >= 1:
         material = 12000
         material -= Decimal(arr[0])
@@ -321,7 +322,8 @@ def sort_method(arr):
     global show_order2, required2, scrap2, excess2
 
     print("\nUSING SORTING METHOD")
-    sort_d(arr)
+    # sort_d(arr)
+    arr.sort()
 
     material = 12000
     required2 = 1
