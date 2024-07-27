@@ -143,50 +143,13 @@ def find_show_order(order_of_slice):
     # ["a", "b", "c", "x", "y", "z"] --> [a, b, c, |sum|, x, y, z, |sum|]
 
 
-# Function for Sorting Method
-def sort_method(arr):
-    global show_order1, required1, scrap1, excess1
-
-    arr.sort(reverse=True)
-    material = 12000
-    order_of_slice = []
-
-    print("\nUSING SORTING METHOD")
-
-    required1 = 0
-    scrap1 = 0
-    excess1 = 0
-
-    if len(arr) != 0:
-        required1 = 1
-
-        while len(arr) >= 1:
-            removed = False
-            for index, i in enumerate(arr):
-                if material - Decimal(i) >= 0:
-                    material -= Decimal(i)
-                    order_of_slice.append(arr[index])
-                    arr.pop(index)
-                    removed = True
-                    break
-
-            if not removed:
-                required1 += 1
-                scrap1 += material
-                material = 12000
-        excess1 = material
-
-    show_order1 = find_and_log_show_order(order_of_slice)
-    print_stats(None, required1, scrap1, excess1)
-
-
 # Function for Adapted Sorting Method
 # this method is much better than the original sorted method
 # Key difference is the use of a dict instead of a list for removing items
-# With a list, pop is used to remove an item. This is inefficient. 
+# With a list, pop is used to remove an item. This is inefficient.
 # With a dict, subtraction can be done to represent the same
 def adapted_sort_method(arr):
-    global show_order2, required2, scrap2, excess2
+    global show_order1, required1, scrap1, excess1
 
     # arr.sort(reverse=True)
     material = 12000
@@ -199,13 +162,13 @@ def adapted_sort_method(arr):
 
     print("\nUSING ADAPTED SORTING METHOD")
 
-    required2 = 0
-    scrap2 = 0
-    excess2 = 0
+    required1 = 0
+    scrap1 = 0
+    excess1 = 0
     order_of_slice = []
 
     if len(arr) != 0:
-        required2 = 1
+        required1 = 1
 
         num_items = len(arr)
         while num_items >= 1:
@@ -222,14 +185,51 @@ def adapted_sort_method(arr):
                 items_dict[item] = count
 
             if not removed:
+                required1 += 1
+                scrap1 += material
+                material = 12000
+
+        excess1 = material
+
+    show_order1 = find_and_log_show_order(order_of_slice)
+    print_stats(show_order1, required1, scrap1, excess1)
+
+
+# Function for Sorting Method
+def sort_method(arr):
+    global show_order2, required2, scrap2, excess2
+
+    arr.sort(reverse=True)
+    material = 12000
+    order_of_slice = []
+
+    print("\nUSING SORTING METHOD")
+
+    required2 = 0
+    scrap2 = 0
+    excess2 = 0
+
+    if len(arr) != 0:
+        required2 = 1
+
+        while len(arr) >= 1:
+            removed = False
+            for index, i in enumerate(arr):
+                if material - Decimal(i) >= 0:
+                    material -= Decimal(i)
+                    order_of_slice.append(arr[index])
+                    arr.pop(index)
+                    removed = True
+                    break
+
+            if not removed:
                 required2 += 1
                 scrap2 += material
                 material = 12000
-
         excess2 = material
 
     show_order2 = find_and_log_show_order(order_of_slice)
-    print_stats(show_order2, required2, scrap2, excess2)
+    print_stats(None, required2, scrap2, excess2)
 
 
 def print_stats(show_order=None, required=None, scrap=None, excess=None):
