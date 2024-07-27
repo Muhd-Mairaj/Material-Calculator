@@ -147,97 +147,97 @@ def find_show_order(order_of_slice):
 def sort_method(arr):
     global show_order1, required1, scrap1, excess1
 
-    print("\nUSING SORTING METHOD")
-    # sort_d(arr)
     arr.sort(reverse=True)
-
-
     material = 12000
-    required1 = 1
-    scrap1 = 0
     order_of_slice = []
 
-    while len(arr) >= 1:
-        for index, i in enumerate(arr):
-            if material - Decimal(i) < 0:
-                continue
-            material -= Decimal(i)
-            order_of_slice.append(arr[index])
-            arr.pop(index)
-            break
-        else:
-            required1 += 1
-            scrap1 += material
-            material = 12000
+    print("\nUSING SORTING METHOD")
 
-        if len(arr) == 0:   # Unnecesary ???
-            break
-    else:
-        required1 = 0
-        material = 0
-    excess1 = material
+    required1 = 0
+    scrap1 = 0
+    excess1 = 0
+
+    if len(arr) != 0:
+        required1 = 1
+
+        while len(arr) >= 1:
+            removed = False
+            for index, i in enumerate(arr):
+                if material - Decimal(i) >= 0:
+                    material -= Decimal(i)
+                    order_of_slice.append(arr[index])
+                    arr.pop(index)
+                    removed = True
+                    break
+
+            if not removed:
+                required1 += 1
+                scrap1 += material
+                material = 12000
+        excess1 = material
 
     show_order1 = find_and_log_show_order(order_of_slice)
-
-    print(f"\033[1;32;40m\n\nrequired raw material: {required1}")
-    # print(f"order of slice: {show_order1}")
-    print(f"total scrap: {scrap1}")
-    print(f"excess at the end: {excess1}\033[1;37;40m \n")
+    print_stats(None, required1, scrap1, excess1)
 
 
-# Function for New Sorting Method
-def new_sort_method(arr):
+# Function for Adapted Sorting Method
+# this method is much better than the original sorted method
+# Key difference is the use of a dict instead of a list for removing items
+# With a list, pop is used to remove an item. This is inefficient. 
+# With a dict, subtraction can be done to represent the same
+def adapted_sort_method(arr):
     global show_order2, required2, scrap2, excess2
 
-    print("\nUSING NEW SORTING METHOD")
-    # sort_d(arr)
-    arr.sort(reverse=True)
-
+    # arr.sort(reverse=True)
     material = 12000
-    required2 = 1
+
+    # dict should maintain sorted order in python >= 3.7
+    items_dict = {}
+    for item in arr:
+        items_dict[item] = items_dict.get(item, 0) + 1
+    items_dict = dict(sorted(items_dict.items()))
+
+    print("\nUSING ADAPTED SORTING METHOD")
+
+    required2 = 0
     scrap2 = 0
+    excess2 = 0
     order_of_slice = []
 
-    items_used = 0
-    start = 0
-    end = len(arr)
-    while items_used < len(arr):
-        for i in range(start, end):
-            item = arr[i]
-            if material - Decimal(item) < 0:
-                break
+    if len(arr) != 0:
+        required2 = 1
 
-            material -= Decimal(item)
-            order_of_slice.append(item)
-            start += 1
-            items_used += 1
+        num_items = len(arr)
+        while num_items >= 1:
+            removed = False
 
-        for i in range(end - 1, start, -1):
-            item = arr[i]
-            if material - Decimal(item) < 0:
-                break
+            for item, count in items_dict.items():
+                while material - Decimal(item) >= 0 and count != 0:
+                    material -= Decimal(item)
+                    order_of_slice.append(item)
+                    count -= 1
+                    num_items -= 1
+                    removed = True
 
-            material -= Decimal(item)
-            order_of_slice.append(item)
-            end -= 1
-            items_used += 1
+                items_dict[item] = count
 
-        required2 += 1
-        scrap2 += material
-        material = 12000
+            if not removed:
+                required2 += 1
+                scrap2 += material
+                material = 12000
 
-    if items_used == 0:
-        required2 = 0
-        material = 0
-    else:
         excess2 = material
 
     show_order2 = find_and_log_show_order(order_of_slice)
+    print_stats(show_order2, required2, scrap2, excess2)
 
-    print(f"\033[1;32;40m\n\nrequired raw material: {required2}")
-    # print(f"order of slice: {show_order2}")
-    print(f"total scrap: {scrap2}")
-    print(f"excess at the end: {excess2}\033[1;37;40m \n")
+
+def print_stats(show_order=None, required=None, scrap=None, excess=None):
+    print(f"order of slice: {show_order}")
+    print(f"\033[1;32;40m\n\nrequired raw material: {required}")
+    print(f"total scrap: {scrap}")
+    print(f"excess at the end: {excess}\033[1;37;40m \n")
+
 
 # Function to add entries to the treeview in enter values tab
 iid_count1 = 0
@@ -292,7 +292,7 @@ def remove_value():
 # function to check which did better
 def check_which_better(
     better: Label,
-) -> Literal["Sort method", "New Sort method", "Same"]:
+) -> Literal["Sort method", "Adopted Sort method", "Same"]:
     """Checks which method did better and modifies the required label to show it"""
     return_value = ""
 
@@ -304,8 +304,8 @@ def check_which_better(
                 return_value = "Sort method"
 
             elif scrap1 > scrap2 and excess2 > excess1:
-                better.config(text="New Sort method was better")
-                return_value = "New Sort method"
+                better.config(text="Adopted Sort method was better")
+                return_value = "Adopted Sort method"
 
             elif scrap1 == scrap2 and excess1 == excess2:
                 better.config(text="Both methods are the exact same")
@@ -328,8 +328,8 @@ def check_which_better(
         return_value = "Sort method"
 
     elif required1 > required2:
-        better.config(text="New Sort method is better")
-        return_value = "New Sort method"
+        better.config(text="Adopted Sort method is better")
+        return_value = "Adopted Sort method"
 
     return return_value
 
@@ -397,7 +397,10 @@ def run():
 
     # Use the two methods
     sort_method(items_list1)
-    new_sort_method(items_list2)
+    adapted_sort_method(items_list2)
+
+    items_list1.clear()
+    items_list2.clear()
 
 
     # Check which did better and display it on the required label
@@ -413,7 +416,7 @@ def run():
         excess = excess1
         show_order = show_order1
 
-    elif which_better == "New Sort method":
+    elif which_better == "Adopted Sort method":
         required = required2
         scrap = scrap2
         excess = excess2
