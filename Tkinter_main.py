@@ -145,7 +145,7 @@ def find_show_order(order_of_slice):
 
 # Function for Sorting Method
 def sort_method(arr):
-    global show_order2, required2, scrap2, excess2
+    global show_order1, required1, scrap1, excess1
 
     print("\nUSING SORTING METHOD")
     # sort_d(arr)
@@ -153,8 +153,8 @@ def sort_method(arr):
 
 
     material = 12000
-    required2 = 1
-    scrap2 = 0
+    required1 = 1
+    scrap1 = 0
     order_of_slice = []
 
     while len(arr) >= 1:
@@ -166,24 +166,78 @@ def sort_method(arr):
             arr.pop(index)
             break
         else:
-            required2 += 1
-            scrap2 += material
+            required1 += 1
+            scrap1 += material
             material = 12000
 
         if len(arr) == 0:   # Unnecesary ???
             break
     else:
+        required1 = 0
+        material = 0
+    excess1 = material
+
+    show_order1 = find_and_log_show_order(order_of_slice)
+
+    print(f"\033[1;32;40m\n\nrequired raw material: {required1}")
+    # print(f"order of slice: {show_order1}")
+    print(f"total scrap: {scrap1}")
+    print(f"excess at the end: {excess1}\033[1;37;40m \n")
+
+
+# Function for New Sorting Method
+def new_sort_method(arr):
+    global show_order2, required2, scrap2, excess2
+
+    print("\nUSING NEW SORTING METHOD")
+    # sort_d(arr)
+    arr.sort(reverse=True)
+
+    material = 12000
+    required2 = 1
+    scrap2 = 0
+    order_of_slice = []
+
+    items_used = 0
+    start = 0
+    end = len(arr)
+    while items_used < len(arr):
+        for i in range(start, end):
+            item = arr[i]
+            if material - Decimal(item) < 0:
+                break
+
+            material -= Decimal(item)
+            order_of_slice.append(item)
+            start += 1
+            items_used += 1
+
+        for i in range(end - 1, start, -1):
+            item = arr[i]
+            if material - Decimal(item) < 0:
+                break
+
+            material -= Decimal(item)
+            order_of_slice.append(item)
+            end -= 1
+            items_used += 1
+
+        required2 += 1
+        scrap2 += material
+        material = 12000
+
+    if items_used == 0:
         required2 = 0
         material = 0
-    excess2 = material
+    else:
+        excess2 = material
 
     show_order2 = find_and_log_show_order(order_of_slice)
 
     print(f"\033[1;32;40m\n\nrequired raw material: {required2}")
-    print(f"order of slice: {show_order2}")
+    # print(f"order of slice: {show_order2}")
     print(f"total scrap: {scrap2}")
     print(f"excess at the end: {excess2}\033[1;37;40m \n")
-
 
 # Function to add entries to the treeview in enter values tab
 iid_count1 = 0
@@ -200,8 +254,8 @@ def add_values():
         raise Exception("Quantity or Values not given")
 
     for _ in range(int(quantity)):
-        items_list1.append(values)
-        items_list2.append(values)
+        items_list1.append(Decimal(values))
+        items_list2.append(Decimal(values))
 
     iid_count1 += 1
 
@@ -238,7 +292,7 @@ def remove_value():
 # function to check which did better
 def check_which_better(
     better: Label,
-) -> Literal["Combination method", "Sort method", "Same"]:
+) -> Literal["Sort method", "New Sort method", "Same"]:
     """Checks which method did better and modifies the required label to show it"""
     return_value = ""
 
@@ -246,12 +300,12 @@ def check_which_better(
 
         if scrap1 + (excess1 - excess2) == scrap2:
             if scrap2 > scrap1 and excess1 > excess2:
-                better.config(text="Combination method was better")
-                return_value = "Combination method"
-
-            elif scrap1 > scrap2 and excess2 > excess1:
                 better.config(text="Sort method was better")
                 return_value = "Sort method"
+
+            elif scrap1 > scrap2 and excess2 > excess1:
+                better.config(text="New Sort method was better")
+                return_value = "New Sort method"
 
             elif scrap1 == scrap2 and excess1 == excess2:
                 better.config(text="Both methods are the exact same")
@@ -270,12 +324,12 @@ def check_which_better(
             ), "EXAMINE THE CODE. VALUES DON'T ADD UP *2*"
 
     elif required1 < required2:
-        better.config(text="Combination method")
-        return_value = "Combination method"
+        better.config(text="Sort method")
+        return_value = "Sort method"
 
     elif required1 > required2:
-        better.config(text="Sort method is better")
-        return_value = "Sort method"
+        better.config(text="New Sort method is better")
+        return_value = "New Sort method"
 
     return return_value
 
@@ -342,23 +396,24 @@ def run():
     ########## -------------------- Output -------------------- ##########
 
     # Use the two methods
-    sort_method(items_list2)
+    sort_method(items_list1)
+    new_sort_method(items_list2)
 
 
     # Check which did better and display it on the required label
 
-    # which_better = check_which_better(better_label)
-    which_better = "Sort Method"
+    which_better = check_which_better(better_label)
+    # which_better = "Sort method"
 
 
     # Add text about combinations method
-    if (which_better == "Combination method") or (which_better == "Same"):
+    if (which_better == "Sort method") or (which_better == "Same"):
         required = required1
         scrap = scrap1
         excess = excess1
         show_order = show_order1
 
-    elif which_better == "Sort method":
+    elif which_better == "New Sort method":
         required = required2
         scrap = scrap2
         excess = excess2
@@ -545,7 +600,6 @@ def user_choose_log_path(master: Tk=None, label=None):
     add_or_replace_attr_in_info_file("log_file_path", log_file_path)
 
 
-
 # Main Function - Shows tkinter view
 def main():
     global frame1, frame2, my_notebook, tree1, tree2
@@ -558,7 +612,7 @@ def main():
 
     root = Tk()
     root.title("MATERIAL COUNTER")
-    root.geometry("340x407")
+    root.geometry("588x474")
     root.config(bg="black")
     root.bind("<Alt-F4>", lambda event: root.destroy())
 
