@@ -4,9 +4,10 @@ from tkinter import filedialog
 from tkinter import messagebox
 from decimal import Decimal
 from random import randint, randrange, uniform
-import re, openpyxl, os, time
 from typing import Literal
 
+import re, openpyxl, os, time
+import pulp
 
 
 USER = os.getlogin()
@@ -239,6 +240,83 @@ def new_sort_method(arr):
     print(f"total scrap: {scrap2}")
     print(f"excess at the end: {excess2}\033[1;37;40m \n")
 
+
+# Function for PuLP method
+# Not efficient for larger number of values
+# Not efficient in use of raw materials (produces more small scrap)
+def pulp_method(arr: list[Decimal]):
+    global show_order2, required2, scrap2, excess2
+
+    arr = [item.__float__() for item in arr]
+    print("\nUSING PuLP METHOD")
+    metal = 12000
+
+    # Create the problem
+    problem = pulp.LpProblem("Cutting_Stock_Problem", pulp.LpMinimize)
+
+    # Variables
+    use_raw_material = pulp.LpVariable.dicts("UseRawMaterial", range(len(arr)), 0, 1, pulp.LpBinary)
+    parts_cut = pulp.LpVariable.dicts("PartsCut", [(i, j) for i in range(len(arr)) for j in range(len(arr))], 0, None, pulp.LpInteger)
+
+    # Objective function - minimize the number of raw material pieces used
+    problem += pulp.lpSum([use_raw_material[i] for i in range(len(arr))]), "MinimizeRawMaterial"
+
+    # Constraints
+    # Each part must be cut exactly once
+    for j in range(len(arr)):
+        problem += pulp.lpSum([parts_cut[(i, j)] for i in range(len(arr))]) == 1, f"Part_{j}_Cut"
+
+    # Total length of parts cut from each raw material piece must not exceed its length
+    for i in range(len(arr)):
+        problem += pulp.lpSum([parts_cut[(i, j)] * arr[j] for j in range(len(arr))]) <= metal * use_raw_material[i], f"RawMaterial_{i}_Usage"
+
+    # Solve the problem
+    problem.solve()
+
+    # Print the results
+    print("Status:", pulp.LpStatus[problem.status])
+    print("Minimum number of raw materials used:", pulp.value(problem.objective))
+
+    # To print the cutting pattern and scrap
+    total_scrap = 0
+    cut_sequences = []  # Store the cutting sequences for each raw material piece
+
+    for i in range(len(arr)):
+        if pulp.value(use_raw_material[i]) == 1:
+            print(f"Raw material piece {i+1} is used:")
+            used_length = 0
+            cut_sequence = []  # Store the sequence of cuts for the current raw material piece
+            for j in range(len(arr)):
+                if pulp.value(parts_cut[(i, j)]) > 0:
+                    times_cut = int(pulp.value(parts_cut[(i, j)]))
+                    cut_sequence.extend([arr[j]] * times_cut)
+                    print(f"  Part of length {arr[j]} meters: {times_cut} time(s)")
+                    used_length += times_cut * arr[j]
+            scrap = metal - used_length
+            total_scrap += scrap
+            print(f"  Scrap: {scrap} meters")
+            cut_sequences.append(cut_sequence)
+
+    print("Total scrap:", total_scrap, "meters")
+
+    # Print the cutting sequences
+    for idx, seq in enumerate(cut_sequences):
+        print(f"Cutting sequence for raw material piece {idx+1}: {seq}")
+
+    scrap2 = Decimal(total_scrap - scrap)
+    excess2 = Decimal(scrap)
+    required2 = int(sum(pulp.value(use_raw_material[i]) for i in range(len(arr))))
+
+    show_order2 = []
+    order_of_slice = [cut for cut_sequence in cut_sequences for cut in cut_sequence ]
+    show_order2 = find_and_log_show_order(order_of_slice)
+
+    print(f"\033[1;32;40m\n\nrequired raw material: {required2}")
+    print(f"order of slice: {show_order2}")
+    print(f"total scrap: {scrap2}")
+    print(f"excess at the end: {excess2}\033[1;37;40m \n")
+
+
 # Function to add entries to the treeview in enter values tab
 iid_count1 = 0
 def add_values():
@@ -397,7 +475,8 @@ def run():
 
     # Use the two methods
     sort_method(items_list1)
-    new_sort_method(items_list2)
+    # new_sort_method(items_list2)
+    pulp_method(items_list2)
 
 
     # Check which did better and display it on the required label
